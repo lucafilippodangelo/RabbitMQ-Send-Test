@@ -4196,11 +4196,11 @@
       "hideWarningsAndErrors": true
     },
     "restore": {
-      "projectUniqueName": "C:\\Users\\ldazu\\source\\repos\\Git\\RabbitMQ-Send-Test\\Send\\Send.csproj",
+      "projectUniqueName": "C:\\Users\\ldazu\\source\\repos\\Git\\RabbitMQ-Send-Test2\\Send\\Send.csproj",
       "projectName": "Send",
-      "projectPath": "C:\\Users\\ldazu\\source\\repos\\Git\\RabbitMQ-Send-Test\\Send\\Send.csproj",
+      "projectPath": "C:\\Users\\ldazu\\source\\repos\\Git\\RabbitMQ-Send-Test2\\Send\\Send.csproj",
       "packagesPath": "C:\\Users\\ldazu\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ldazu\\source\\repos\\Git\\RabbitMQ-Send-Test\\Send\\obj\\",
+      "outputPath": "C:\\Users\\ldazu\\source\\repos\\Git\\RabbitMQ-Send-Test2\\Send\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",
