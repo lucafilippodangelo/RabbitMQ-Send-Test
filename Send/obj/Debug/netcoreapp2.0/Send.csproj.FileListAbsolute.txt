@@ -9,3 +9,14 @@ C:\Users\ldazu\source\repos\Local\RabbitMQ\Send\Send\bin\Debug\netcoreapp2.0\Sen
 C:\Users\ldazu\source\repos\Local\RabbitMQ\Send\Send\obj\Debug\netcoreapp2.0\Send.dll
 C:\Users\ldazu\source\repos\Local\RabbitMQ\Send\Send\obj\Debug\netcoreapp2.0\Send.pdb
 C:\Users\ldazu\source\repos\Local\RabbitMQ\Send\Send\obj\Debug\netcoreapp2.0\Send.csprojResolveAssemblyReference.cache
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\bin\Debug\netcoreapp2.0\Send.deps.json
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\bin\Debug\netcoreapp2.0\Send.runtimeconfig.json
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\bin\Debug\netcoreapp2.0\Send.runtimeconfig.dev.json
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\bin\Debug\netcoreapp2.0\Send.dll
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\bin\Debug\netcoreapp2.0\Send.pdb
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\obj\Debug\netcoreapp2.0\Send.csprojResolveAssemblyReference.cache
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\obj\Debug\netcoreapp2.0\Send.csproj.CoreCompileInputs.cache
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\obj\Debug\netcoreapp2.0\Send.AssemblyInfoInputs.cache
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\obj\Debug\netcoreapp2.0\Send.AssemblyInfo.cs
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\obj\Debug\netcoreapp2.0\Send.dll
+C:\Users\ldazu\source\repos\Git\RabbitMQ-Send-Test2\Send\obj\Debug\netcoreapp2.0\Send.pdb
