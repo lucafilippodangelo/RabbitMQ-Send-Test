@@ -9,22 +9,45 @@ namespace Send
     {
         public static void Main(string[] args)
         {
-            //LD invoke methods
-            #region region //LD STEP001
-            //sendVersion1();
-            #endregion
+            //runVersion(1); //LD STEP001
+            //runVersion(2); //LD STEP002
+            runVersion(3); //LD STEP003
+        }
 
-            #region region //LD STEP002
+        //LD invoke methods
+        #region region common methods
+
+        public static void runVersion(int ver)
+        {
             string[] vettoreDiStringhe = new string[] { "aaa.......", "bbb...", "ccc.", "ddd.....", "eee............", "fff..", "ggg............", "hhh...", "iii." };
-            foreach (string element in vettoreDiStringhe)
+
+            switch (ver)
             {
-                sendVersion2(element);
+                case 1:
+                    sendVersion1();
+                    break;
+                case 2:
+                    foreach (string element in vettoreDiStringhe)
+                    {
+                        sendVersion2(element);
+                    }
+                    break;
+                case 3:
+                    foreach (string element in vettoreDiStringhe)
+                    {
+                        sendVersion3(element);
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Default case");
+                    break;
             }
+
             Console.WriteLine(" task_queue - Press [enter] to exit.");
             Console.ReadLine();
-            #endregion
-
         }
+
+        #endregion
 
         #region region //LD STEP001
         private static void sendVersion1()
@@ -83,13 +106,47 @@ namespace Send
                 //LD STEP002C
                 properties.Persistent = true; 
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "task_queue",
+                channel.BasicPublish(exchange: "",//LD STEP003A
+                                     routingKey: "task_queue",//LD STEP003A
                                      basicProperties: properties,
                                      body: body);
 
                 //LD removed to automatize the sending of the messages by a for loop
                 //Console.WriteLine(" [x] Sent {0}", message);
+            }
+        }
+        #endregion
+
+        #region region //LD STEP003
+        /// <summary>
+        /// 
+        /// </summary>
+        //LD STEP003
+        private static void sendVersion3(string anElement)
+        {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeclare(queue: "task_queue",
+                                     durable: true, 
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var message = anElement;//GetMessage(args);
+                var body = Encoding.UTF8.GetBytes(message);
+
+                var properties = channel.CreateBasicProperties();
+
+                properties.Persistent = true;
+
+                channel.BasicPublish(exchange: "logs", //LD STEP003B
+                                     routingKey: "", //LD STEP003A
+                                     basicProperties: properties,
+                                     body: body);
+
+                Console.WriteLine(" [x] Sent {0}", message);
             }
         }
         #endregion
