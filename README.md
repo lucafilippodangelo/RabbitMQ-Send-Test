@@ -2,18 +2,18 @@
 
 Preparation
  - install "dotnet add package RabbitMQ.Client"
+
 Terms used:
 - what is a "socket"? Is one endpoint of a two-way communication link between two programs running on the network. A socket is bound to a port number so that the TCP layer can identify the application that data is destined to be sent to.
-- 
 
 ## //LD STEP001 (sendVersion1 and receiveVersion1 methods)
-###Implementation of basic message broker
+### Implementation of basic message broker
 resource -> https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html
 
 Implementation of two simple methods: "producer" that sends a single message, and a "consumer" running continuously to listen, that receives messages and prints them out.
 
 ## //LD STEP002 (sendVersion2 and receiveVersion2 methods)
-###Implementation of a Work Queue that will be used to distribute time-consuming tasks among multiple workers.
+### Implementation of a Work Queue that will be used to distribute time-consuming tasks among multiple workers.
 resource -> https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
 
 
@@ -43,13 +43,13 @@ If a consumer dies (its channel is closed, connection is closed, or TCP connecti
 
 There aren't any message timeouts; RabbitMQ will redeliver the message when the consumer dies. It's fine even if processing a message takes a very, very long time.
 
-###//LD STEP002A - setup "automatic acknowledgement mode"
+### //LD STEP002A - setup "automatic acknowledgement mode"
 Manual message acknowledgments are turned on by default. In previous examples we explicitly turned them off by setting the autoAck ("automatic acknowledgement mode") parameter to true. It's time to remove this flag and manually send a proper acknowledgment from the worker, once we're done with a task.
 
 Forgotten acknowledgment (command to display missed messages acknowledged)
  - rabbitmqctl.bat list_queues name messages_ready messages_unacknowledged
 
-###//LD STEP002B - message durability
+### //LD STEP002B - message durability
 We have learned how to make sure that even if the consumer dies, the task isn't lost. But our tasks will still be lost if RabbitMQ server stops.
 
 When RabbitMQ quits or crashes it will forget the queues and messages unless you tell it not to. Two things are required to make sure that messages aren't lost: we need to mark both the queue and messages as durable.
@@ -58,12 +58,12 @@ First, we need to make sure that RabbitMQ will never lose our queue. In order to
 
 Note: Although this command is correct by itself, it won't work in our present setup. That's because we've already defined a queue called hello which is not durable.
 
-###//LD STEP002C - message persistent
+### //LD STEP002C - message persistent
 At this point we're sure that the task_queue queue won't be lost even if RabbitMQ restarts. Now we need to mark our messages as persistent - by setting IBasicProperties.SetPersistent to true.
 
 Note: Marking messages as persistent doesn't fully guarantee that a message won't be lost. Although it tells RabbitMQ to save the message to disk, there is still a short time window when RabbitMQ has accepted a message and hasn't saved it yet
 
-###//LD STEP002D - fair message dispatch
+### //LD STEP002D - fair message dispatch
 You might have noticed that the dispatching still doesn't work exactly as we want. For example in a situation with two workers, when all odd messages are heavy and even messages are light, one worker will be constantly busy and the other one will do hardly any work. Well, RabbitMQ doesn't know anything about that and will still dispatch messages evenly.
 
 This happens because RabbitMQ just dispatches a message when the message enters the queue. It doesn't look at the number of unacknowledged messages for a consumer. It just blindly dispatches every n-th message to the n-th consumer.
