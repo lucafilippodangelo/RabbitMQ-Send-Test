@@ -11,7 +11,8 @@ namespace Send
         {
             //runVersion(1); //LD STEP001
             //runVersion(2); //LD STEP002
-            runVersion(3); //LD STEP003
+            //runVersion(3); //LD STEP003
+            runVersion(4); //LD STEP004
         }
 
         //LD invoke methods
@@ -20,6 +21,9 @@ namespace Send
         public static void runVersion(int ver)
         {
             string[] vettoreDiStringhe = new string[] { "aaa.......", "bbb...", "ccc.", "ddd.....", "eee............", "fff..", "ggg............", "hhh...", "iii." };
+
+            string[] strSeverity = new string[] { "aaa-green", "bbb-orange", "ccc-red", "ddd-red", "eee-red", "fff-orange", "ggg-green.", "hhh-orange", "iii-green" };
+            string[] severity = new string[] {"green", "orange", "red", "red", "red", "orange", "green", "orange", "green"};
 
             switch (ver)
             {
@@ -36,6 +40,12 @@ namespace Send
                     foreach (string element in vettoreDiStringhe)
                     {
                         sendVersion3(element);
+                    }
+                    break;
+                case 4:
+                    for (int i = 0; i < strSeverity.Length; i++)
+                    {
+                        sendVersion4(strSeverity[i],severity[i]);
                     }
                     break;
                 default:
@@ -122,6 +132,7 @@ namespace Send
         /// This method emit logs, The producer program, doesn't look much different from the //LD STEP002. 
         /// The most important change is that we now want to publish messages to our logs 
         /// exchange instead of the nameless one.
+        /// WE DON'T DECLARE A QUEUE
         /// </summary>
         //LD STEP003
         private static void sendVersion3(string anElement)
@@ -143,6 +154,37 @@ namespace Send
                                      body: body);
 
                 Console.WriteLine(" [x] Sent {0}", message);
+            }
+        }
+        #endregion
+
+        #region region //LD STEP004
+        /// <summary>
+        /// Adding a feature to //LD STEP003, we're going to make it possible to subscribe only to a subset of the messages.
+        /// WE DON'T DECLARE A QUEUE
+        /// </summary>
+        //LD STEP004
+        private static void sendVersion4(string message, string severity)
+        {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                //LD STEP004C
+                channel.ExchangeDeclare(exchange: "direct_logs", 
+                                        type: "direct");
+
+                var body = Encoding.UTF8.GetBytes(message);
+
+                //LD STEP004D
+                // a message goes to the queues 
+                // whose binding key exactly matches the routing key of the message
+                channel.BasicPublish(exchange: "direct_logs",
+                                     routingKey: severity,
+                                     basicProperties: null,
+                                     body: body);
+
+                Console.WriteLine(" [x] Sent '{0}':'{1}'", severity, message);
             }
         }
         #endregion

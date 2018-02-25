@@ -78,7 +78,7 @@ For more information on IModel methods and IBasicProperties:
  - http://www.rabbitmq.com/releases/rabbitmq-dotnet-client/v3.6.10/rabbitmq-dotnet-client-3.6.10-client-htmldoc/html/index.html
 
 ## //LD STEP003 (sendVersion3 and receiveVersion3 methods)
-### Use of the pattern "publish/subscribe", deliver a message to multiple consumers, published log messages are going to be broadcast to all the receivers. 
+### Use of the pattern "publish/subscribe", implementation of a simple logging system. Will be able to broadcast log messages to many receivers.
 resource -> https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html
 
 **Description**: to illustrate the pattern, we're going to build a simple logging system. It will consist of two programs, the first will emit log messages and the second will receive and print them.
@@ -133,3 +133,52 @@ You can list existing bindings using -> rabbitmqctl list_bindings
   - cd C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive -> dotnet run
 - run one instance of "receiveVersion3" in Visual studio or consolle
 - both the receivers should receive the same logs, and then use those as preferred.
+
+## //LD STEP004 (sendVersion4 and receiveVersion4 methods)
+### Implementation of improvements on the logging system. Instead of using a fanout exchange only capable of dummy broadcasting, here is used a direct one, gained a possibility of selectively receiving the logs.
+resource -> https://www.rabbitmq.com/tutorials/tutorial-four-dotnet.html
+
+### //LD STEP004A - binding key and subscribing (receiver)
+Bindings can take an extra "routingKey" parameter. To avoid the confusion with a "BasicPublish" parameter we're going to call it a "binding key".
+
+### //LD STEP004B - Direct exchange
+
+Our logging system from the previous tutorial broadcasts all messages to all consumers. We want to extend that to allow filtering messages based on their severity.
+
+We were using a **fanout** exchange, which doesn't give us much flexibility - it's only capable of mindless broadcasting.
+
+We will use a **direct exchange** instead. The routing algorithm behind a direct exchange is simple: a message goes to the queues whose binding key exactly matches the routing key of the message.
+
+Note: see code demo
+
+**Multiple bindings**(see tutoria for illustrated demo): It is perfectly legal to bind multiple queues with the same binding key. In our example we could add a binding between X and Q1 with binding key black. In that case, the direct exchange will behave like fanout and will broadcast the message to all the matching queues. A message with routing key black will be delivered to both Q1 and Q2. 
+
+### //LD STEP004C - Emitting logs, "direct" Exchange creation (sender)
+
+### //LD STEP004D - Emitting logs, send the message (sender)
+
+We will supply the log "severity" as a routing key. That way the receiving script will be able to select the severity it wants to receive. To simplify things we will assume that 'severity' can be one of 'info', 'warning', 'error'.
+
+### How to test
+just run "sendVersion4" and "receiveVersion4", once I'm binding in the receiver just the routingKey: 'orange' for a specific queue, below the expected result:
+
+- Sender
+ [x] Sent 'green':'aaa-green'
+ [x] Sent 'orange':'bbb-orange'
+ [x] Sent 'red':'ccc-red'
+ [x] Sent 'red':'ddd-red'
+ [x] Sent 'red':'eee-red'
+ [x] Sent 'orange':'fff-orange'
+ [x] Sent 'green':'ggg-green.'
+ [x] Sent 'orange':'hhh-orange'
+ [x] Sent 'green':'iii-green'
+ task_queue - Press [enter] to exit.
+
+- Receiver
+ PS C:\Users\ldazu> cd C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive
+ PS C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive> dotnet run
+ [*] Waiting for logs
+ Press [enter] to exit.
+ [x] Received 'orange':'bbb-orange'
+ [x] Received 'orange':'fff-orange'
+ [x] Received 'orange':'hhh-orange'
