@@ -119,7 +119,9 @@ namespace Send
 
         #region region //LD STEP003
         /// <summary>
-        /// 
+        /// This method emit logs, The producer program, doesn't look much different from the //LD STEP002. 
+        /// The most important change is that we now want to publish messages to our logs 
+        /// exchange instead of the nameless one.
         /// </summary>
         //LD STEP003
         private static void sendVersion3(string anElement)
@@ -128,28 +130,21 @@ namespace Send
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.QueueDeclare(queue: "task_queue",
-                                     durable: true, 
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
 
-                var message = anElement;//GetMessage(args);
+                //LD STEP003B
+                channel.ExchangeDeclare(exchange: "logs", type: "fanout");
+
+                var message = anElement;
                 var body = Encoding.UTF8.GetBytes(message);
 
-                var properties = channel.CreateBasicProperties();
-
-                properties.Persistent = true;
-
                 channel.BasicPublish(exchange: "logs", //LD STEP003B
-                                     routingKey: "", //LD STEP003A
-                                     basicProperties: properties,
+                                     routingKey: "", //LD STEP003B
+                                     basicProperties: null, //LD not anymore "persistent"
                                      body: body);
 
                 Console.WriteLine(" [x] Sent {0}", message);
             }
         }
         #endregion
-
     }
 }

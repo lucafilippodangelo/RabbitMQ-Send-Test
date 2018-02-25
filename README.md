@@ -81,27 +81,55 @@ For more information on IModel methods and IBasicProperties:
 ### Use of the pattern "publish/subscribe", deliver a message to multiple consumers, published log messages are going to be broadcast to all the receivers. 
 resource -> https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html
 
-Description: to illustrate the pattern, we're going to build a simple logging system. It will consist of two programs, the first will emit log messages and the second will receive and print them.
+**Description**: to illustrate the pattern, we're going to build a simple logging system. It will consist of two programs, the first will emit log messages and the second will receive and print them.
 In our logging system every running copy of the receiver program will get the messages. That way we'll be able to run one receiver and direct the logs to disk; and at the same time we'll be able to run another receiver and see the logs on the screen.
 
-Exchange concept: the producer can only send messages to an **exchange**. An exchange is a very simple thing. On one side it receives messages from producers and the other side it pushes them to queues. The exchange must know exactly what to do with a message it receives. Should it be appended to a particular queue? Should it be appended to many queues? Or should it get discarded. The rules for that are defined by the exchange type.
+**Exchange concept**: the producer can only send messages to an "exchange". An exchange on one side it receives messages from producers and the other side it pushes them to queues. The exchange must know exactly what to do with a message it receives. Should it be appended to a particular queue? Should it be appended to many queues? Or should it get discarded. The rules for that are defined by the exchange type.
 
 There are a few exchange types available: 
  - direct
  - topic
  - headers 
  - fanout
-   - code -> channel.ExchangeDeclare("logs", "fanout");
+   - //LD STEP003B, code -> channel.ExchangeDeclare("logs", "fanout");
    - description: broadcasts all the messages it receives to all the queues it knows.
 
 To list the exchanges on the server you can run -> sudo rabbitmqctl list_exchanges
 
-### //LD STEP003A - //LD STEP003B - the default exchange
+### //LD STEP003A - //LD STEP003B - the default exchange (sender)
 
 The first parameter is the the name of the exchange. The empty string denotes the default or nameless exchange: messages are routed to the queue with the name specified by routingKey, if it exists.
+Giving a queue a name is important when you want to share the queue between producers and consumers
 
 Now, we can publish to our named exchange //LD STEP003B instead of the queue (step2 //LD STEP003A)
  - code -> channel.BasicPublish(exchange: "logs", routingKey: "", basicProperties: null, body: body);
 
+**Note**: The messages will be lost if no queue is bound to the exchange yet, but that's okay for us; if no consumer is listening yet we can safely discard the message.
+
 ### //LD STEP003C - Temporary queues 
 
+Previously we were using queues which had a specified name (remember hello and task_queue?). Being able to name a queue was crucial for us -- we needed to point the workers to the same queue. Giving a queue a name is important when you want to share the queue between producers and consumers.
+
+For the logger, We want to hear about all log messages, not just a subset of them. We're also interested only in currently flowing messages not in the old ones. To solve that we need two things:
+ - //LD STEP003C, Firstly, whenever we connect to Rabbit we need a fresh, empty queue. To do this we could create a queue with a random name, or, even better - let the server choose a random queue name for us. 
+ - Secondly, once we disconnect the consumer the queue should be automatically deleted.
+
+In the .NET client, when we supply no parameters to queueDeclare() we create a non-durable, exclusive, autodelete queue with a generated name:
+ - code -> var queueName = channel.QueueDeclare().QueueName;
+ - for more details: https://www.rabbitmq.com/queues.html
+
+At that point queueName contains a random queue name. For example it may look like amq.gen-JzTY20BRgKO-HjmUJj0wLg.
+
+### //LD STEP003D - Bindings
+
+We've already created a fanout exchange and a queue. Now we need to tell the exchange to send messages to our queue. That relationship between exchange and a queue is called a binding.
+
+From now on the logs exchange will append messages to our queue.
+
+You can list existing bindings using -> rabbitmqctl list_bindings
+
+### How to test
+- run two or more instances of "receiveVersion3" in "windows powershell"
+  - cd C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive -> dotnet run
+- run one instance of "receiveVersion3" in Visual studio or consolle
+- both the receivers should receive the same logs, and then use those as preferred.
