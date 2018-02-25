@@ -163,6 +163,7 @@ We will supply the log "severity" as a routing key. That way the receiving scrip
 just run "sendVersion4" and "receiveVersion4", once I'm binding in the receiver just the routingKey: 'orange' for a specific queue, below the expected result:
 
 - Sender
+ ```
  [x] Sent 'green':'aaa-green'
  [x] Sent 'orange':'bbb-orange'
  [x] Sent 'red':'ccc-red'
@@ -173,8 +174,11 @@ just run "sendVersion4" and "receiveVersion4", once I'm binding in the receiver 
  [x] Sent 'orange':'hhh-orange'
  [x] Sent 'green':'iii-green'
  task_queue - Press [enter] to exit.
+ ```
 
 - Receiver
+ 
+ ```
  PS C:\Users\ldazu> cd C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive
  PS C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive> dotnet run
  [*] Waiting for logs
@@ -182,3 +186,4 @@ just run "sendVersion4" and "receiveVersion4", once I'm binding in the receiver 
  [x] Received 'orange':'bbb-orange'
  [x] Received 'orange':'fff-orange'
  [x] Received 'orange':'hhh-orange'
+ ```
