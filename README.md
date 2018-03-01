@@ -187,3 +187,54 @@ just run "sendVersion4" and "receiveVersion4", once I'm binding in the receiver 
  [x] Received 'orange':'fff-orange'
  [x] Received 'orange':'hhh-orange'
  ```
+ 
+
+## //LD STEP005 (sendVersion5 and receiveVersion5 methods)
+### Use of Topic Exchange. Implementation of updates to the code in order to subscribe to not only logs based on severity, but also based on the source which emitted the log.
+https://www.rabbitmq.com/tutorials/tutorial-five-dotnet.html
+
+### //LD STEP005A - Topic exchange
+
+Messages sent to a **topic** exchange can't have an arbitrary **routing_key** - it must be a list of words, delimited by dots. The words can be anything, but usually they specify some features connected to the message. A few valid routing key examples: "stock.usd.nyse", "nyse.vmw", "quick.orange.rabbit". There can be as many words in the routing key as you like, up to the limit of 255 bytes.
+
+The binding key must also be in the same form. The logic behind the **topic exchange** is similar to a **direct** one - a message sent with a particular routing key will be delivered to all the queues that are bound with a matching binding key. However there are two important special cases for binding keys:
+ - * (star) can substitute for exactly one word.
+ - # (hash) can substitute for zero or more words.
+
+### //LD STEP005B - Topic exchange example to implement
+
+We're going to use a topic exchange in our logging system. We'll start off with a working assumption that the routing keys of logs will have two words: "<facility>.<severity>".
+
+### How to test
+just run "sendVersion5" and "receiveVersion5", once I'm binding in the receiver just the routingKey: 'orange' for a specific queue, below the expected result:
+
+- Sender
+ ```
+ [x] Sent 'facilityA.green':'aaa-green'
+ [x] Sent 'facilityB.orange':'bbb-orange'
+ [x] Sent 'facilityC.red':'ccc-red'
+ [x] Sent 'facilityD.red':'ddd-red'
+ [x] Sent 'facilityE.red':'eee-red'
+ [x] Sent 'facilityF.orange':'fff-orange'
+ [x] Sent 'facilityG.green':'ggg-green.'
+ [x] Sent 'facilityH.orange':'hhh-orange'
+ [x] Sent 'facilityI.green':'iii-green'
+ task_queue - Press [enter] to exit.
+ ```
+
+- Receiver
+ ```
+PS C:\Users\ldazu> cd C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive
+PS C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive> dotnet run
+ [*] Waiting for logs
+ Press [enter] to exit.
+ [x] Received 'facilityB.orange':'bbb-orange'
+ [x] Received 'facilityF.orange':'fff-orange'
+ [x] Received 'facilityH.orange':'hhh-orange'
+ ```
+
+
+ Resources:
+ - https://www.compose.com/articles/configuring-rabbitmq-exchanges-queues-and-bindings-part-2/
+ - https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html
+ - https://docs.wso2.com/display/MB220/Publishing+and+Receiving+Messages+from+a+Topic

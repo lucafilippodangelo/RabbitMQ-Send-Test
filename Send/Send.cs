@@ -2,7 +2,6 @@
 using System.Text;
 using RabbitMQ.Client;
 
-
 namespace Send
 {
     class Send
@@ -12,7 +11,8 @@ namespace Send
             //runVersion(1); //LD STEP001
             //runVersion(2); //LD STEP002
             //runVersion(3); //LD STEP003
-            runVersion(4); //LD STEP004
+            //runVersion(4); //LD STEP004
+            runVersion(5); //LD STEP005
         }
 
         //LD invoke methods
@@ -22,8 +22,9 @@ namespace Send
         {
             string[] vettoreDiStringhe = new string[] { "aaa.......", "bbb...", "ccc.", "ddd.....", "eee............", "fff..", "ggg............", "hhh...", "iii." };
 
-            string[] strSeverity = new string[] { "aaa-green", "bbb-orange", "ccc-red", "ddd-red", "eee-red", "fff-orange", "ggg-green.", "hhh-orange", "iii-green" };
+            string[] stringa = new string[] { "aaa-green", "bbb-orange", "ccc-red", "ddd-red", "eee-red", "fff-orange", "ggg-green.", "hhh-orange", "iii-green" };
             string[] severity = new string[] {"green", "orange", "red", "red", "red", "orange", "green", "orange", "green"};
+            string[] topicExchangeRoutingKey = new string[] { "facilityA.green", "facilityB.orange", "facilityC.red", "facilityD.red", "facilityE.red", "facilityF.orange", "facilityG.green", "facilityH.orange", "facilityI.green" };
 
             switch (ver)
             {
@@ -43,9 +44,15 @@ namespace Send
                     }
                     break;
                 case 4:
-                    for (int i = 0; i < strSeverity.Length; i++)
+                    for (int i = 0; i < stringa.Length; i++)
                     {
-                        sendVersion4(strSeverity[i],severity[i]);
+                        sendVersion4(stringa[i],severity[i]);
+                    }
+                    break;
+                case 5:
+                    for (int i = 0; i < stringa.Length; i++)
+                    {
+                        sendVersion5(stringa[i], topicExchangeRoutingKey[i]);
                     }
                     break;
                 default:
@@ -188,5 +195,34 @@ namespace Send
             }
         }
         #endregion
+
+        #region region //LD STEP005
+        /// <summary>
+        /// Use of Topic Exchange. Implementation of updates to the code in order to subscribe
+        /// to not only logs based on severity, but also based on the source which emitted the log.
+        /// </summary>
+        //LD STEP005
+        private static void sendVersion5(string message, string topicExchangeRoutingKey)
+        {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                //LD STEP005B
+                channel.ExchangeDeclare(exchange: "topic_logs",
+                                        type: "topic");
+
+                var body = Encoding.UTF8.GetBytes(message);
+
+                channel.BasicPublish(exchange: "topic_logs",
+                                                 routingKey: topicExchangeRoutingKey,
+                                                 basicProperties: null,
+                                                 body: body);
+
+                Console.WriteLine(" [x] Sent for ver.5 '{0}':'{1}'", topicExchangeRoutingKey, message);
+            }
+        }
+        #endregion
+
     }
 }
