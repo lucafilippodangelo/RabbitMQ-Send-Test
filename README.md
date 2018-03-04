@@ -6,13 +6,15 @@ Preparation
 Terms used:
 - what is a "socket"? Is one endpoint of a two-way communication link between two programs running on the network. A socket is bound to a port number so that the TCP layer can identify the application that data is destined to be sent to.
 
-## //LD STEP001 (sendVersion1 and receiveVersion1 methods)
+## //LD STEP001 - Basic Message Broker
+(sendVersion1 and receiveVersion1 methods)
 ### Implementation of basic message broker
 resource -> https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html
 
 Implementation of two simple methods: "producer" that sends a single message, and a "consumer" running continuously to listen, that receives messages and prints them out.
 
-## //LD STEP002 (sendVersion2 and receiveVersion2 methods)
+## //LD STEP002 - Queue
+ (sendVersion2 and receiveVersion2 methods)
 ### Implementation of a Work Queue that will be used to distribute time-consuming tasks among multiple workers.
 resource -> https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
 
@@ -77,7 +79,8 @@ Using message acknowledgments and BasicQos you can set up a work queue. The dura
 For more information on IModel methods and IBasicProperties:
  - http://www.rabbitmq.com/releases/rabbitmq-dotnet-client/v3.6.10/rabbitmq-dotnet-client-3.6.10-client-htmldoc/html/index.html
 
-## //LD STEP003 (sendVersion3 and receiveVersion3 methods)
+## //LD STEP003 - Default Exchange
+(sendVersion3 and receiveVersion3 methods)
 ### Use of the pattern "publish/subscribe", implementation of a simple logging system. Will be able to broadcast log messages to many receivers.
 resource -> https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html
 
@@ -134,7 +137,8 @@ You can list existing bindings using -> rabbitmqctl list_bindings
 - run one instance of "receiveVersion3" in Visual studio or consolle
 - both the receivers should receive the same logs, and then use those as preferred.
 
-## //LD STEP004 (sendVersion4 and receiveVersion4 methods)
+## //LD STEP004 - Direct exchange
+(sendVersion4 and receiveVersion4 methods)
 ### Implementation of improvements on the logging system. Instead of using a fanout exchange only capable of dummy broadcasting, here is used a direct one, gained a possibility of selectively receiving the logs.
 resource -> https://www.rabbitmq.com/tutorials/tutorial-four-dotnet.html
 
@@ -188,9 +192,9 @@ just run "sendVersion4" and "receiveVersion4", once I'm binding in the receiver 
  [x] Received 'orange':'hhh-orange'
  ```
  
-
-## //LD STEP005 (sendVersion5 and receiveVersion5 methods)
-### Use of Topic Exchange. Implementation of updates to the code in order to subscribe to not only logs based on severity, but also based on the source which emitted the log.
+## //LD STEP005 - Use of Topic Exchange
+(sendVersion5 and receiveVersion5 methods)
+### Implementation of updates to the code in order to subscribe to not only logs based on severity, but also based on the source which emitted the log.
 https://www.rabbitmq.com/tutorials/tutorial-five-dotnet.html
 
 ### //LD STEP005A - Topic exchange
@@ -238,3 +242,54 @@ PS C:\Users\ldazu\source\repos\Git\RabbitMQ-Receive-Test\receive> dotnet run
  - https://www.compose.com/articles/configuring-rabbitmq-exchanges-queues-and-bindings-part-2/
  - https://www.cloudamqp.com/blog/2015-09-03-part4-rabbitmq-for-beginners-exchanges-routing-keys-bindings.html
  - https://docs.wso2.com/display/MB220/Publishing+and+Receiving+Messages+from+a+Topic
+
+## //LD STEP006 - Remote procedure call (RPC)
+(sendVersion6 and receiveVersion6 methods)
+### Goal: run a function on a remote computer and wait for the resultrun a function on a remote computer and wait for the result. Will use RabbitMQ to build an RPC system: a client and a scalable RPC server.
+As we don't have any time-consuming tasks that are worth distributing, we're going to create a dummy RPC service that returns Fibonacci numbers.
+https://www.rabbitmq.com/tutorials/tutorial-six-dotnet.html
+
+### //LD STEP006A - Client Interface
+To illustrate how an RPC service could be used we're going to create a simple client class. It's going to expose a method named call which sends an RPC request and blocks until the answer is received:
+
+```
+var rpcClient = new RPCClient();
+
+Console.WriteLine(" [x] Requesting fib(30)");
+var response = rpcClient.Call("30");
+Console.WriteLine(" [.] Got '{0}'", response);
+
+rpcClient.Close();
+```
+
+### //LD STEP006B - Client Callback queue
+In general doing RPC over RabbitMQ is easy. A client sends a request message and a server replies with a response message. In order to receive a response we need to send a 'callback' queue address with the request:
+
+```
+var corrId = Guid.NewGuid().ToString();
+var props = channel.CreateBasicProperties();
+props.ReplyTo = replyQueueName;
+props.CorrelationId = corrId;
+
+var messageBytes = Encoding.UTF8.GetBytes(message);
+channel.BasicPublish(exchange: "",
+                     routingKey: "rpc_queue",
+                     basicProperties: props,
+                     body: messageBytes);
+
+// ... then code to read a response message from the callback_queue ...
+```
+
+
+### Message properties
+The AMQP 0-9-1 protocol predefines a set of 14 properties that go with a message. Most of the properties are rarely used, with the exception of the following:
+
+- **deliveryMode**: Marks a message as persistent (with a value of 2) or transient (any other value). You may remember this property from the second tutorial.
+- **contentType**: Used to describe the mime-type of the encoding. For example for the often used JSON encoding it is a good practice to set this property to: application/json.
+- **replyTo**: Commonly used to name a callback queue.
+- **correlationId**: Useful to correlate RPC responses with requests.
+  - In the method presented above we suggest creating a callback queue for every RPC request. That's pretty inefficient, but fortunately there is a better way - let's create a single callback queue per client.
+
+That raises a new issue, having received a response in that queue it's not clear to which request the response belongs. That's when the correlationId property is used. We're going to set it to a unique value for every request. Later, when we receive a message in the callback queue we'll look at this property, and based on that we'll be able to match a response with a request. If we see an unknown correlationId value, we may safely discard the message - it doesn't belong to our requests.
+
+You may ask, why should we ignore unknown messages in the callback queue, rather than failing with an error? It's due to a possibility of a race condition on the server side. Although unlikely, it is possible that the RPC server will die just after sending us the answer, but before sending an acknowledgment message for the request. If that happens, the restarted RPC server will process the request again. That's why on the client we must handle the duplicate responses gracefully, and the RPC should ideally be idempotent.

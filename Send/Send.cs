@@ -17,7 +17,6 @@ namespace Send
 
         //LD invoke methods
         #region region common methods
-
         public static void runVersion(int ver)
         {
             string[] vettoreDiStringhe = new string[] { "aaa.......", "bbb...", "ccc.", "ddd.....", "eee............", "fff..", "ggg............", "hhh...", "iii." };
@@ -63,7 +62,6 @@ namespace Send
             Console.WriteLine(" task_queue - Press [enter] to exit.");
             Console.ReadLine();
         }
-
         #endregion
 
         #region region //LD STEP001
