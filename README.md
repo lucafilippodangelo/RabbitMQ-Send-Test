@@ -302,3 +302,11 @@ You may ask, why should we ignore unknown messages in the callback queue, rather
 - The RPC worker (aka: server) is waiting for requests on that queue. When a request appears, it does the job and sends a message with the result back to the Client, using the queue from the  replyTo field.
 - The client waits for data on the callback queue. When a message appears, it checks the correlationId property. If it matches the value from the request it returns the response to the application.
 
+### Other resources:
+- https://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html
+- https://www.pluralsight.com/courses/rabbitmq-by-example
+- https://aspnetmonsters.com/2017/03/2017-03-18-RabbitMQ%20from%20ASP/
+- https://dotnetcodr.com/messaging/
+- https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/
+- https://fullstackmark.com/post/12/get-started-building-microservices-with-asp.net-core-and-docker-in-visual-studio-code
+- https://www.simplethread.com/using-rabbitmq-with-c-and-net/
